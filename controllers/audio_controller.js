@@ -2,7 +2,7 @@ import createPromiseCapability from '../utils/promise_capability.js';
 
 export default class AudioController {
   constructor() {
-    this._baseUrl = 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/audio/1_stereo_128000/dash/';
+    this._baseUrl = 'https://bitmovin-a.akamaihd.net/content/art-of-motion_drm/audio/1_stereo_192000/cenc_dash/';
     this._initUrl = this._baseUrl + 'init.mp4';
     this._templateUrl = this._baseUrl + 'segment_$Number$.m4s';
     this._numberOfChunks = 52;
