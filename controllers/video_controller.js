@@ -1,28 +1,33 @@
 import createPromiseCapability from '../utils/promise_capability.js';
 
-export default class AudioController {
-  constructor(mediaSource) {
+export default class VideoController {
+  constructor(video) {
+    this._video = video;
     this._baseUrl = 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/video/720_2400000/dash/';
-    this._initUrl = this.baseUrl + 'init.mp4';
-    this._templateUrl = this.baseUrl + 'segment_$Number$.m4s';
-    this._mediaSource = mediaSource;
+    this._initUrl = this._baseUrl + 'init.mp4';
+    this._templateUrl = this._baseUrl + 'segment_$Number$.m4s';
     this._numberOfChunks = 52;
     this._index = 0;
-
-    this._mediaSource.onsourceopen = this._onMediaSourceOpen.bind(this);
   }
 
-  _onMediaSourceOpen() {
-    this._sourceBuffer = this._mediaSource.addSourceBuffer('video/mp4; codecs="avc1.4d401f"');
+  onMediaSourceOpen(mediaSource) {
+    this._sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="avc1.4d401f"');
     this._sourceBuffer.addEventListener('updateend', this._nextSegment.bind(this));
     return this._getChunk(this._initUrl).then((chunk) => {
-      this._appendToBuffer(chunk);
+      this._appendToBuffer(chunk).then(() => {
+        this._video.play();
+      });
     });
   }
 
 
   _appendToBuffer(chunk) {
-    return this._sourceBuffer.appendBuffer(chunk);
+    let appendCapability = createPromiseCapability();
+    if (chunk) {
+      this._sourceBuffer.appendBuffer(new Uint8Array(chunk));
+      appendCapability.resolve();
+    }
+    return appendCapability.promise;
   }
 
   _nextSegment() {

@@ -1,4 +1,4 @@
-export default function createMediaSource {
+export default function createMediaSource() {
   if (!window.MediaSource) {
     throw new Error('No Media Source API available');
   }

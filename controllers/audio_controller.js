@@ -1,19 +1,16 @@
 import createPromiseCapability from '../utils/promise_capability.js';
 
 export default class AudioController {
-  constructor(mediaSource) {
+  constructor() {
     this._baseUrl = 'https://bitdash-a.akamaihd.net/content/MI201109210084_1/audio/1_stereo_128000/dash/';
-    this._initUrl = this.baseUrl + 'init.mp4';
-    this._templateUrl = this.baseUrl + 'segment_$Number$.m4s';
-    this._mediaSource = mediaSource;
+    this._initUrl = this._baseUrl + 'init.mp4';
+    this._templateUrl = this._baseUrl + 'segment_$Number$.m4s';
     this._numberOfChunks = 52;
     this._index = 0;
-
-    this._mediaSource.onsourceopen = this._onMediaSourceOpen.bind(this);
   }
 
-  _onMediaSourceOpen() {
-    this._sourceBuffer = this._mediaSource.addSourceBuffer('audio/mp4; codecs="mp4a.40.2"');
+  onMediaSourceOpen(mediaSource) {
+    this._sourceBuffer = mediaSource.addSourceBuffer('audio/mp4; codecs="mp4a.40.2"');
     this._sourceBuffer.addEventListener('updateend', this._nextSegment.bind(this));
     return this._getChunk(this._initUrl).then((chunk) => {
       return this._appendToBuffer(chunk);
@@ -21,7 +18,9 @@ export default class AudioController {
   }
 
   _appendToBuffer(chunk) {
-    return this._sourceBuffer.appendBuffer(chunk);
+    if (chunk) {
+      this._sourceBuffer.appendBuffer(new Uint8Array(chunk));
+    }
   }
 
   _nextSegment() {
